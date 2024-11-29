@@ -54,16 +54,29 @@ class App {
   }
 
   _setupModel() {
-    const geometry = new THREE.BoxGeometry(1, 1, 1); // Box geometry 가로,세로,깊이 
-    const material = new THREE.MeshStandardMaterial({color: "#09A693"});//material = MeshStandardMaterial가 기본 
-    const cube = new THREE.Mesh(geometry, material); // geometry와 material을 이용해 mesh 생성
-    this._scene.add(cube); // scene에 mesh 추가
+    const geometry = new THREE.SphereGeometry(0.5, 32, 2, THREE.MathUtils.degToRad(0),THREE.MathUtils.degToRad(360),THREE.MathUtils.degToRad(30)); 
+    const fillMaterial = new THREE.MeshStandardMaterial({color: 0x515151});//material = MeshStandardMaterial가 기본 
+    const cube = new THREE.Mesh(geometry, fillMaterial); // geometry와 material을 이용해 mesh 생성
     this._mesh = cube; // 나중에 애니메이션 등에서 사용할 수 있도록 필드화로 저장 
+
+    // 박스에 라인 추가 
+    const lineMaterial = new THREE.LineBasicMaterial({color: 0xffff00});
+    const wireframe = new THREE.WireframeGeometry(geometry);
+    const line = new THREE.LineSegments(wireframe, lineMaterial);
+    this._line = line;
+
+    //그룹으로 묶기. 라인과 큐브를 한번에 움직이기 위해 //필드화 
+    const group = new THREE.Group(); 
+    group.add(this._mesh);
+    group.add(this._line);
+    this._scene.add(group);
+    this._group = group; 
   }
 
   update(){
     const delta = this._clock.getDelta();
     this._mesh.rotation.y += delta * 0.5;
+    this._line.rotation.y += delta * 0.5;
   }
 
   render(){
