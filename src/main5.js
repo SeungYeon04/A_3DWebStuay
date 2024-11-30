@@ -44,12 +44,22 @@ class App {
 
   _setupLight() { //빛 - 조명
     //https://polyhaven.com/a/small_harbour_sunset에서 가져옴 
-    const rgbeLoader = new RGBELoader();
-    rgbeLoader.load("./small_harbour_sunset_1k.hdr", (env) => { 
-        env.mapping = THREE.EquirectangularReflectionMapping; 
-        //this._scene.background = env; 
-        this._scene.environment = env; 
-    }); 
+    //const rgbeLoader = new RGBELoader();
+    //rgbeLoader.load("./small_harbour_sunset_1k.hdr", (env) => { 
+    //    env.mapping = THREE.EquirectangularReflectionMapping; 
+    //    //this._scene.background = env; 
+    //    this._scene.environment = env; 
+    //}); 
+
+    //const ambientLight = new THREE.AmbientLight("#ff0000", 0.2); 
+    //this._scene.add(ambientLight); 
+
+    //const hemisphereLight = new THREE.HemisphereLight("#0x0000ff", "#0xaa1100", 10); 
+    //this._scene.add(hemisphereLight);
+    
+    const directionalLight = new THREE.DirectionalLight("#ffffff", 5); 
+    directionalLight.position.set(1, 1, 1); 
+    this._scene.add(directionalLight); 
   }
 
   _setControls() { //터치해서 3D구경하기 위한 메서드 
@@ -68,12 +78,13 @@ class App {
 
 
     const material_2 = new THREE.MeshPhysicalMaterial({
-        color: "#e8e8e8",  // 살짝 회색빛이 도는 은색
+        color: "#999999",  
         metalness: 1,      // 금속성 최대 
         roughness: 0.1,    // 더 매끄럽게 수정
         reflectivity: 1,   // 반사도 최대
         envMapIntensity: 1.5, // 환경맵 강도 증가
-        toneMapped: true,     // 톤매핑 활성화
+        toneMapped: true,     // 톤매핑 활성화 
+        sheen: 0.2, 
     }); 
 
 
