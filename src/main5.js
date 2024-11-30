@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import './style.css'
 import { OrbitControls, RGBELoader } from 'three/addons/Addons.js';
-import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
 class App {
 
@@ -28,6 +27,11 @@ class App {
 
     this._renderer = renderer;
 
+    const textOverlay = document.createElement('div');
+    textOverlay.id = 'text-overlay';
+    textOverlay.textContent = 'Help';
+    divContainer.appendChild(textOverlay);
+
     // Scene - 장면
     const scene = new THREE.Scene();
     scene.background = new THREE.Color("#2c6e50");  // scene의 배경색을 청록색으로
@@ -44,22 +48,13 @@ class App {
 
   _setupLight() { //빛 - 조명
     //https://polyhaven.com/a/small_harbour_sunset에서 가져옴 
-    //const rgbeLoader = new RGBELoader();
-    //rgbeLoader.load("./small_harbour_sunset_1k.hdr", (env) => { 
-    //    env.mapping = THREE.EquirectangularReflectionMapping; 
-    //    //this._scene.background = env; 
-    //    this._scene.environment = env; 
-    //}); 
+    const rgbeLoader = new RGBELoader();
+    rgbeLoader.load("./small_harbour_sunset_1k.hdr", (env) => { 
+        env.mapping = THREE.EquirectangularReflectionMapping; 
+        //this._scene.background = env; 
+        this._scene.environment = env; 
+    }); 
 
-    //const ambientLight = new THREE.AmbientLight("#ff0000", 0.2); 
-    //this._scene.add(ambientLight); 
-
-    //const hemisphereLight = new THREE.HemisphereLight("#0x0000ff", "#0xaa1100", 10); 
-    //this._scene.add(hemisphereLight);
-    
-    const directionalLight = new THREE.DirectionalLight("#ffffff", 5); 
-    directionalLight.position.set(1, 1, 1); 
-    this._scene.add(directionalLight); 
   }
 
   _setControls() { //터치해서 3D구경하기 위한 메서드 
