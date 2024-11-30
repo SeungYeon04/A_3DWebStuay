@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import './style.css'
-import { OrbitControls } from 'three/addons/Addons.js';
+import { OrbitControls, RGBELoader } from 'three/addons/Addons.js';
 
 class App {
 
@@ -10,6 +10,8 @@ class App {
     this._setupLight(); 
     this._setupModel(); 
     this._setupEvent(); 
+    this._setupModel_map();
+    this._setupModel_map2();
     this._setControls(); 
   }
 
@@ -30,20 +32,31 @@ class App {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color("#2c6e50");  // scene의 배경색을 청록색으로
     this._scene = scene;
+
+    // 조명 추가
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1); // 환경광 강도 증가
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 2); // 직사광 강도 증가
+    directionalLight.position.set(2, 2, 2);
+    scene.add(directionalLight);
   }
 
   _setupCamera() { //카메라 
     const width = window.innerWidth; 
     const height = window.innerHeight; 
-    const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 100); 
+    const camera = new THREE.PerspectiveCamera(120, width / height, 0.1, 100); 
     camera.position.z = 3; 
     this._camera = camera; 
   }
 
   _setupLight() { //빛 - 조명
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1); 
-    directionalLight.position.set(1, 1, 4); 
-    this._scene.add(directionalLight); 
+    const rgbeLoader = new RGBELoader();
+    rgbeLoader.load("./small_harbour_sunset_1k.hdr", (env) => { 
+        env.mapping = THREE.EquirectangularReflectionMapping; 
+        this._scene.background = env; 
+        this._scene.environment = env; 
+    }); 
   }
 
   _setControls() { //터치해서 3D구경하기 위한 메서드 
@@ -54,16 +67,62 @@ class App {
   }
 
   _setupModel() {
-    const geometry = new THREE.BoxGeometry(1, 1, 1); // Box geometry 가로,세로,깊이 
-    const material = new THREE.MeshStandardMaterial({color: "#09A693"});//material = MeshStandardMaterial가 기본 
-    const cube = new THREE.Mesh(geometry, material); // geometry와 material을 이용해 mesh 생성
-    this._scene.add(cube); // scene에 mesh 추가
-    this._mesh = cube; // 나중에 애니메이션 등에서 사용할 수 있도록 필드화로 저장 
+    
+  }
+
+  _setupModel_map() {
+  }
+
+  _setupModel_map2() {
+    const textureLoader = new THREE.TextureLoader();
+    const map = textureLoader.load("./Glass_Window_002_basecolor.jpg");
+    map.colorSpace = THREE.SRGBColorSpace; //RGB로 이미지색 그대로 표시
+
+
+    const mapMetallic = textureLoader.load("./Glass_Window_002_metallic.jpg");
+    const mapRoughness = textureLoader.load("./Glass_Window_002_roughness.jpg");
+    const mapNormal = textureLoader.load("./Glass_Window_002_normal.jpg");
+    const mapHeight = textureLoader.load("./Glass_Window_002_height.png");
+    const mapAO = textureLoader.load("./Glass_Window_002_ambientOcclusion.jpg");
+    const mapAlpha = textureLoader.load("./Glass_Window_002_opacity.jpg");
+
+    const material = new THREE.MeshStandardMaterial({
+
+    roughness: 0.1,  // 매끈한 효과
+    metalness: 0.8,  // 금속성 증가
+
+    map: map, 
+    mapMetallic: mapMetallic,
+    mapRoughness: mapRoughness,
+
+    normalMap: mapNormal,
+
+    displacementMap: mapHeight, // 돌출사진 
+    displacementScale: 0.1,  
+    displacementBias: -0.08,   
+    normalScale: new THREE.Vector2(2, 2),  // 노말맵 강도 증가
+    
+    aoMap: mapAO,
+    aoMapIntensity: 1.5,
+
+    alphaMap: mapAlpha,
+    transparent: true,
+    
+    side: THREE.DoubleSide,
+  });
+
+    const geomBox = new THREE.BoxGeometry(1.5, 1.5, 1.5); 
+    const box = new THREE.Mesh(geomBox, material); 
+    this._scene.add(box); 
+
+    const loader = new THREE.SphereGeometry(1);
+    const sphere = new THREE.Mesh(loader, material);
+    sphere.position.x = 2;
+    this._scene.add(sphere);
   }
 
   update(){
-    const delta = this._clock.getDelta();
-    this._mesh.rotation.y += delta * 0.5;
+    
   }
 
   render(){

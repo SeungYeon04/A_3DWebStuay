@@ -22,6 +22,7 @@ class App {
       powerPreference: "high-performance"
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
     divContainer.appendChild(renderer.domElement);
     this._divContainer = divContainer; 
 
@@ -67,29 +68,13 @@ class App {
 
 
     const material_2 = new THREE.MeshPhysicalMaterial({
-        color: "green", 
-        transparent: true, 
-        side: THREE.DoubleSide, 
-        opacity: 0.5, 
-        roughness: 0.2, 
-        metalness: 0.5, 
-        clearcoat: 0,
-        emissive: "red", 
+        color: "#e8e8e8",  // 살짝 회색빛이 도는 은색
+        metalness: 1,      // 금속성 최대 
+        roughness: 0.1,    // 더 매끄럽게 수정
+        reflectivity: 1,   // 반사도 최대
+        envMapIntensity: 1.5, // 환경맵 강도 증가
+        toneMapped: true,     // 톤매핑 활성화
     }); 
-
-    const gui = new GUI(); 
-    gui.add(material_2, "roughness").min(0).max(1).step(0.01); 
-    gui.addColor(material_2, "color"); 
-    gui.addColor(material_2, "emissive"); 
-    gui.add(material_2, "emissiveIntensity").min(0).max(1).step(0.01); 
-    gui.add(material_2, "metalness").min(0).max(1).step(0.01); 
-    gui.add(material_2, "transparent"); 
-    gui.add(material_2, "opacity").min(0).max(1).step(0.01); 
-    gui.add(material_2, "clearcoat").min(0).max(1).step(0.01);  
-    gui.add(material_2, "clearcoatRoughness").min(0).max(1).step(0.01);  
-    gui.add(material_2, "ior").min(1).max(2.333).step(0.01);  
-    gui.add(material_2, "thickness").min(0).max(5).step(0.01);  
-
 
 
     const gromGround = new THREE.PlaneGeometry(5, 5); 
