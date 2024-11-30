@@ -9,8 +9,8 @@ class App {
     this._setupCamera(); 
     this._setupLight(); 
     this._setupModel(); 
-    this._setupEvent(); 
     this._setControls(); 
+    this._setupEvent(); 
   }
 
   _setupThreeJs() {
@@ -35,8 +35,8 @@ class App {
   _setupCamera() { //카메라 
     const width = window.innerWidth; 
     const height = window.innerHeight; 
-    const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 100); 
-    camera.position.z = 3; 
+    const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100); //60화각이 작을수록 외곡이 적다 
+    camera.position.set(2, 2, 3.5); 
     this._camera = camera; 
   }
 
@@ -54,31 +54,57 @@ class App {
   }
 
   _setupModel() {
-    const geometry = new THREE.SphereGeometry(0.5, 32, 2, THREE.MathUtils.degToRad(0),THREE.MathUtils.degToRad(360),THREE.MathUtils.degToRad(10)); 
-    const fillMaterial = new THREE.MeshStandardMaterial({color: 0x515151});//material = MeshStandardMaterial가 기본 
-    const cube = new THREE.Mesh(geometry, fillMaterial); // geometry와 material을 이용해 mesh 생성
-    this._mesh = cube; // 나중에 애니메이션 등에서 사용할 수 있도록 필드화로 저장 
+    const axishelper = new THREE.AxesHelper(3); 
+    this._scene.add(axishelper); //z파랑 y초록 z빨강 
+    this._axishelper = axishelper;
+    axishelper.position.y = -1; 
 
-    // 박스에 라인 추가 
-    const lineMaterial = new THREE.LineBasicMaterial({color: 0xffff00});
-    const wireframe = new THREE.WireframeGeometry(geometry);
-    const line = new THREE.LineSegments(wireframe, lineMaterial);
-    this._line = line;
+    const material = new THREE.MeshStandardMaterial({color: "#aaaaaa"}); 
+    const gromGround = new THREE.PlaneGeometry(5, 5); 
+    const ground = new THREE.Mesh(gromGround, material); 
+    this._scene.add(ground); //소환 
+    ground.rotation.x = THREE.MathUtils.degToRad(-90); 
+    ground.position.y = -1; 
+    
 
-    //그룹으로 묶기. 라인과 큐브를 한번에 움직이기 위해 //필드화 
-    const group = new THREE.Group(); 
-    group.add(this._mesh);
-    group.add(this._line);
-    this._scene.add(group);
-    this._group = group; 
+    const geomBigSphere = new THREE.SphereGeometry(1, 32, 16,0, THREE.MathUtils.degToRad(360),0, THREE.MathUtils.degToRad(90)); 
+    const bigSphere = new THREE.Mesh(geomBigSphere, material); 
+    this._scene.add(bigSphere); //소환
+    bigSphere.position.y = -1; 
+  
+    const geomSmallSphere = new THREE.SphereGeometry(0.2);
+    const smallSphere = new THREE.Mesh(geomSmallSphere, material); 
+    const smallSpherePivot = new THREE.Object3D(); 
+    bigSphere.add(smallSpherePivot); //부모로 지정 
+    smallSpherePivot.add(smallSphere); //자식으로 지정 
+    smallSphere.position.x = -2; 
+    smallSphere.position.y = 0.1; 
+
+    this._smallSpherePivot = smallSpherePivot;
+    this._smallSphere = smallSphere; 
+
+    const cntItems = 8; 
+    const geomTorus = new THREE.TorusGeometry(0.2, 0.1); 
+    for(let i = 0; i < cntItems; i++){
+      const torus = new THREE.Mesh(geomTorus, material); 
+      const torusPivot = new THREE.Object3D(); 
+      torusPivot.add(torus); 
+      bigSphere.add(torusPivot); 
+      torusPivot.rotation.y = THREE.MathUtils.degToRad(360) * i / cntItems; 
+      torus.position.x = 2; //부모 -> 자식 기준으로 돈다 
+    }
+    
+    
   }
 
-  update(){
+  update() {
     const delta = this._clock.getDelta();
-    this._mesh.rotation.y += delta * 0.5;
-    this._line.rotation.y += delta * 0.5;
+    
+    this._smallSpherePivot.rotation.y += delta; 
+    this._axishelper.rotation.y += delta; 
+    this._controls.update();
   }
-
+  
   render(){
     requestAnimationFrame(this.render.bind(this));
     
